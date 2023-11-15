@@ -7,6 +7,7 @@ To run locally:
 Go to http://localhost:8111 in your browser.
 A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
+# test github personal branch
 """
 import os
   # accessible as a variable in index.html:
@@ -29,7 +30,7 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #
 #     DATABASEURI = "postgresql://gravano:foobar@34.75.94.195/proj1part2"
 #
-DATABASEURI = "postgresql://user:password@34.75.94.195/proj1part2"
+DATABASEURI = "postgresql://ec3365:394036@34.75.94.195/proj1part2"
 
 
 #
