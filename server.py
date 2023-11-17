@@ -9,11 +9,24 @@ Read about it online.
 # test github personal branch
 """
 import os
-
+from flask_login import login_user, login_required, logout_user, current_user
+from .models import login_info
 # accessible as a variable in index.html:
 from sqlalchemy import *
+import sqlalchemy
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, abort
+from flask import (
+    Flask,
+    flash,
+    request,
+    render_template,
+    g,
+    redirect,
+    Response,
+    abort,
+    url_for,
+)
+from werkzeug.security import check_password_hash
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -36,13 +49,14 @@ DATABASEURI = "postgresql://ec3365:394036@34.75.94.195/proj1part2"
 #
 # This line creates a database engine that knows how to connect to the URI above.
 #
-# engine = create_engine(DATABASEURI)
+engine = create_engine(DATABASEURI)
+db = sqlalchemy(app)
 
 # #
 # # Example of running queries in your database
 # # Note that this will probably not work if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
 # #
-# conn = engine.connect()
+conn = engine.connect()
 
 # # The string needs to be wrapped around text()
 
@@ -203,10 +217,61 @@ def add():
     return redirect("/")
 
 
-@app.route("/login")
+@app.route("/signup")
+def signup():
+    email = request.form.get("email")
+    password1 = request.form.get("password1")
+    password2 = request.form.get("password2")
+
+    user = login_info.query.filter_by(
+        email=email
+    ).first()  # should this be user or login_info?
+    if user:
+        flash("Email already exists.", category="error")
+    elif password1 != password2:
+        flash("Passwords don't match.", category="error")
+    else:
+        new_login_info = login_info(
+            email=email,
+            password=generate_password_hash(password1, method="sha256"),
+        )
+
+        # new_user = Users(email = email, )
+
+        db.session.add(new_login_info)
+        db.session.add(new_user)
+        db.session.commit()
+        login_user(new_user, remember=True)
+        flash("Account created!", category="success")
+        return redirect(url_for("views.home"))
+
+    return render_template("sign_up.html", user=current_user)
+
+    return render_template("demo_signup.html")
+
+
+@app.route("/login", methods=["POST", "GET"])
 def login():
-    abort(401)
-    this_is_never_executed()
+    if request.method == "POST":
+        email = request.form.get("email")
+        password = request.form.get("password")
+
+        user = Users.query.filter_by(email=email).first()
+        if user:
+            if check_password_hash(user.password, password):
+                flash("Logged in successfully!", category="success")
+                login_user(user, remember=True)
+
+                # success => go home ? what do we do now ?
+                # do we have to retrieve the actualy user oject from user table ?
+                return redirect(url_for("views.home"))
+
+            else:
+                flash("Incorrect password, try again.", category="error")
+        else:
+            flash("Email does not exist.", category="error")
+
+    return render_template("demo_login.html", user=current_user)
 
 
 if __name__ == "__main__":
@@ -217,6 +282,11 @@ if __name__ == "__main__":
     @click.option("--threaded", is_flag=True)
     @click.argument("HOST", default="0.0.0.0")
     @click.argument("PORT", default=8111, type=int)
+
+
+    db.create_all()
+
+
     def run(debug, threaded, host, port):
         """
         This function handles command line parameters.
