@@ -1,0 +1,65 @@
+{% extends "base.html" %}
+{% block content %}
+    <div class="query">
+        Looking For....
+       
+        <select name="" id="user" onchange="newform()">
+            <option value="artist" selected>Artist</option>
+            <option value="customer">Customer</option>
+        </select>
+        
+        <div id="artist">
+          <form action="">
+            <br>
+            <label for="name">Name </label><input type="text" id="name"/>
+            <br>
+            <label for="skill">Skills </label><input type="text" id="skill"/>
+            <br>
+            <label for="product">Product </label><input type="text" id="product"/>
+            <br>
+            <label for="service">Service </label><input type="text" id="service"/>
+            <br>
+            <label for="location">Location (zip) </label><input type="text" 	id="location"/>
+            <br>
+            <input type="submit" value="Submit">
+            </form>
+        </div>
+        <div id="customer" style="visibility:hidden">
+            <form action="">
+            <label for="name">Name</label><input type="text" id="name"/>
+            <br>
+            <label for="industry">Industry</label><input type="text" id="industry"/>
+            <br>
+            <label for="product">Looking for...Product </label><input type="text" id="product"/>
+            <br>
+            <label for="service">Looking for... Service </label><input type="text" id="service"/>
+            <br>
+            <label for="location">Location (zip) </label><input type="text" 	id="location"/>
+            <br>
+            <input type="submit" value="Submit">
+            </form>
+        </div>
+        
+        <script type="text/javascript">
+        function newform()
+        {
+            var x = document.getElementById("user").value;
+            if(x=="artist")
+            {
+                document.getElementById("artist").style.visibility = "visible";
+                document.getElementById("customer").style.visibility = "hidden";
+            }
+            else
+            {
+                document.getElementById("customer").style.visibility = "visible";
+                document.getElementById("artist").style.visibility = "hidden";
+            }
+        }
+        </script>
+    </div>  
+
+    <!--Triggered by submitting-->
+    <div class="results" style="visibility:hidden">
+
+    </div>
+{% endblock %}
