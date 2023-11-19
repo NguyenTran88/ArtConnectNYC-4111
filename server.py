@@ -11,7 +11,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, abort
+from flask import Flask, request, render_template, g, redirect, Response, abort, url_for
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -209,7 +209,7 @@ def test():
 def add():
     name = request.form["name"]
     params_dict = {"name": name}
-    g.conn.execute(text("SELECT * FROM users U, artist a WHERE u.user_id = a.user_id"))
+    g.conn.execute(text("INSERT INTO test(name) VALUES (:name)"), params_dict)
     g.conn.commit()
 
     return redirect("/")
@@ -235,6 +235,123 @@ merged_dict = {
     "user_id_customer": "c",
     "hiring": "c",
 }
+
+skills_mapping = {
+    "DJ": 0,
+    "Jazz musician": 1,
+    "classical musician": 2,
+    "painter": 3,
+    "illustrator": 4,
+    "ceramics": 5,
+    "sculpture": 6,
+    "portrait": 7,
+    "piano": 8,
+    "acrylics": 9,
+    "modeling": 10,
+}
+
+
+@app.route("/search_artist", methods=["POST", "GET"])
+def search_artist():
+    # # name, skill, product, service, location
+    # if request.method == "GET":
+    #     return render_template("search_artist.html")
+
+    # query_field = ""
+    # query_val = ""
+    # for field, val in request.form.items():
+    #     if val and len(val) > 0:
+    #         query_field = field
+    #         query_val = val
+    # args = {"query_field": query_field, "query_val": query_val}
+
+    # query_str = "SELECT * FROM users U, artist A, %s Q WHERE U.user_id = A.user_id AND "
+    # #Name:
+    # if query_field == "name":
+    #     query_str = "SELECT * FROM users U, artist A WHERE U.user_id = A.user_id AND U.name = '%s';" % query_val
+    # elif query_field == "location":
+    #     query_str = "SELECT * FROM users U, artist A WHERE U.user_id = A.user_id AND U.location = '%s';" % query_val
+    # elif query_field == "skill":
+    if request.method == "GET":
+        return render_template("search_artist.html")
+
+    input_field = next(iter(request.form.keys()), None)
+    user_info = []
+    if input_field:
+        input = request.form[input_field]
+        input_list = input.split(",")
+        if input_field == "name":
+            for actual_name in input_list:
+                params_dict = {"actual_name": actual_name}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, artist A WHERE U.user_id = A.user_id AND U.name = :actual_name"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
+        elif input_field == "location":
+            for actual_location in input_list:
+                params_dict = {"actual_location": actual_location}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, artist A WHERE U.user_id = A.user_id AND U.location = :actual_location"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
+        elif input_field == "skill":
+            for actual_skill in input_list:
+                skill_id = skills_mapping[actual_skill]
+                params_dict = {"actual_skill": skill_id}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, artist A, has H WHERE U.user_id = A.user_id AND A.user_id = H.user_id AND H.skill_id = :actual_skill"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
+        elif input_field == "product":
+            # choose products based on medium: i.e: I want to buy a painting, sculpture,...
+            for actual_product in input_list:
+                params_dict = {"actual_product": actual_product}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT * FROM users U, artist A, poffers_products P WHERE U.user_id = A.user_id AND A.user_id = P.user_id AND P.medium = :actual_product"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    user_info.append(result)
+                    print(result)
+        elif input_field == "service":
+            for actual_service in input_list:
+                params_dict = {"actual_service": actual_service}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email, S.service_id FROM users U, artist A, soffers_services S WHERE U.user_id = A.user_id AND A.user_id = S.user_id AND S.service_type = :actual_service"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    user_info.append(result)
+                    print(result)
+    print("my_user_info", user_info)
+    # return render_template("search_artist.html")
+    return redirect(url_for("view", users=user_info))
+
+
+@app.route("/view/<users>", methods=["POST", "GET"])
+def view(users):
+    return render_template("view.html", users=users)
 
 
 @app.route("/search", methods=["POST", "GET"])
