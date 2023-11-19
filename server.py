@@ -6,27 +6,12 @@ To run locally:
 Go to http://localhost:8111 in your browser.
 A debugger such as "pdb" may be helpful for debugging.
 Read about it online.
-# test github personal branch
 """
+
 import os
-from flask_login import login_user, login_required, logout_user, current_user
-from .models import login_info
-# accessible as a variable in index.html:
 from sqlalchemy import *
-import sqlalchemy
 from sqlalchemy.pool import NullPool
-from flask import (
-    Flask,
-    flash,
-    request,
-    render_template,
-    g,
-    redirect,
-    Response,
-    abort,
-    url_for,
-)
-from werkzeug.security import check_password_hash
+from flask import Flask, request, render_template, g, redirect, Response, abort
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -43,30 +28,37 @@ app = Flask(__name__, template_folder=tmpl_dir)
 #
 #     DATABASEURI = "postgresql://gravano:foobar@34.75.94.195/proj1part2"
 #
-DATABASEURI = "postgresql://ec3365:394036@34.75.94.195/proj1part2"
+DATABASEURI = "postgresql://ec3365:394036@34.74.171.121/proj1part2"
 
 
 #
 # This line creates a database engine that knows how to connect to the URI above.
 #
 engine = create_engine(DATABASEURI)
-db = sqlalchemy(app)
 
-# #
-# # Example of running queries in your database
-# # Note that this will probably not work if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
-# #
+#
+# Example of running queries in your database
+# Note that this will probably not work if you already have a table named 'test' in your database, containing meaningful data. This is only an example showing you how to run queries in your database using SQLAlchemy.
+#
 conn = engine.connect()
 
-# # The string needs to be wrapped around text()
+# The string needs to be wrapped around text()
 
-# conn.execute(text("""CREATE TABLE IF NOT EXISTS test (
+# conn.execute(
+#     text(
+#         """CREATE TABLE IF NOT EXISTS test (
 #   id serial,
 #   name text
-# );"""))
-# conn.execute(text("""INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');"""))
+# );"""
+#     )
+# )
+# conn.execute(
+#     text(
+#         """INSERT INTO test(name) VALUES ('grace hopper'), ('alan turing'), ('ada lovelace');"""
+#     )
+# )
 
-# # To make the queries run, we need to add this commit line
+# To make the queries run, we need to add this commit line
 
 # conn.commit()
 
@@ -115,14 +107,6 @@ def teardown_request(exception):
 # see for routing: https://flask.palletsprojects.com/en/2.0.x/quickstart/?highlight=routing
 # see for decorators: http://simeonfranklin.com/blog/2012/jul/1/python-decorators-in-12-steps/
 #
-
-
-# test with another.html
-@app.route("/another")
-def another_test():
-    return render_template("another.html")
-
-
 @app.route("/")
 def index():
     """
@@ -137,7 +121,7 @@ def index():
     """
 
     # DEBUG: this is debugging code to see what request looks like
-    print(request.args)
+    # print(request.args)
 
     #
     # example of a database query
@@ -202,8 +186,21 @@ def index():
 # Notice that the function name is another() rather than index()
 # The functions for each app.route need to have different names
 #
-@app.route("/another")
+
+
+@app.route("/another", methods=["POST", "GET"])
 def another():
+    return render_template("another.html")
+
+
+@app.route("/test")
+def test():
+    cursor = g.conn.execute(text("INSERT INTO test(name) VALUES (:name)"), params_dict)
+    g.conn.commit()
+    print("")
+    for result in cursor:
+        print(result)
+    cursor.close()
     return render_template("another.html")
 
 
@@ -212,66 +209,84 @@ def another():
 def add():
     name = request.form["name"]
     params_dict = {"name": name}
-    g.conn.execute(text("INSERT INTO test(name) VALUES (:name)"), params_dict)
+    g.conn.execute(text("SELECT * FROM users U, artist a WHERE u.user_id = a.user_id"))
     g.conn.commit()
+
     return redirect("/")
 
 
-@app.route("/signup")
-def signup():
-    email = request.form.get("email")
-    password1 = request.form.get("password1")
-    password2 = request.form.get("password2")
-
-    user = login_info.query.filter_by(
-        email=email
-    ).first()  # should this be user or login_info?
-    if user:
-        flash("Email already exists.", category="error")
-    elif password1 != password2:
-        flash("Passwords don't match.", category="error")
-    else:
-        new_login_info = login_info(
-            email=email,
-            password=generate_password_hash(password1, method="sha256"),
-        )
-
-        # new_user = Users(email = email, )
-
-        db.session.add(new_login_info)
-        db.session.add(new_user)
-        db.session.commit()
-        login_user(new_user, remember=True)
-        flash("Account created!", category="success")
-        return redirect(url_for("views.home"))
-
-    return render_template("sign_up.html", user=current_user)
-
-    return render_template("demo_signup.html")
-
-
-@app.route("/login", methods=["POST", "GET"])
+@app.route("/login")
 def login():
-    if request.method == "POST":
-        email = request.form.get("email")
-        password = request.form.get("password")
+    abort(401)
+    this_is_never_executed()
 
-        user = Users.query.filter_by(email=email).first()
-        if user:
-            if check_password_hash(user.password, password):
-                flash("Logged in successfully!", category="success")
-                login_user(user, remember=True)
 
-                # success => go home ? what do we do now ?
-                # do we have to retrieve the actualy user oject from user table ?
-                return redirect(url_for("views.home"))
+merged_dict = {
+    "user_id_artist": "a",
+    "portfolio_link": "a",
+    "price_lower_bound": "a",
+    "price_upper_bound": "a",
+    "availableforhire": "a",
+    "user_id_users": "u",
+    "name": "u",
+    "location": "u",
+    "email": "u",
+    "bio": "u",
+    "user_id_customer": "c",
+    "hiring": "c",
+}
 
+
+@app.route("/search", methods=["POST", "GET"])
+def search():
+    if request.method == "GET":
+        return render_template("search2.html")
+
+    print(request.form)
+    target = request.form[
+        "target_type"
+    ]  # this tells us whether we are searching for artist or customer
+
+    if target == "artist":
+        query_str = "SELECT * FROM users U, artist a WHERE u.user_id = a.user_id AND "
+    else:
+        query_str = "SELECT * FROM users U, artist a WHERE u.user_id = c.user_id AND "
+
+    print(query_str)
+    # slec from user u, artist a, skills s where s.skill = %s
+    # loop over everything, see if it is filled out, only 1 is filled out
+    # if it is filled out, add to query string
+    # VD: query_str = SELECT * FROM users U, artist a,
+    # if skill set is filled out => query_str += skill_set s
+    # query_str += WHERE u.user_id = a.user_id AND u.name = 'Vivian'
+    # SELECT * FROM users U artist a, {%s} extra WHERE
+
+    # key is the name of the input, val is the value of the input
+    for key, val in request.form.items():
+        if val and len(val) > 0:
+            parent_table = merged_dict[key]
+            # now parent_table = u,a, or c
+            # think about cases where upper bound => we use <,> instead of =
+            if key == "price_lower_bound":
+                query_str += parent_table + "price_lower_bound" + " >= " + val + " AND "
+            elif key == "price_upper_bound":
+                query_str += parent_table + "price_upper_bound" + " <= " + val + " AND "
             else:
-                flash("Incorrect password, try again.", category="error")
-        else:
-            flash("Email does not exist.", category="error")
+                query_str += parent_table + key + " = " + val + " AND "
 
-    return render_template("demo_login.html", user=current_user)
+    query_str = query_str[:-4] + ";"
+    print(query_str)
+    cursor = g.conn.execute(text(query_str))
+    g.conn.commit()
+    cursor.close()
+
+    results = []
+    for result in cursor:
+        print(result[0])  # debug name
+        results.append(result)
+
+    context = dict(data=results)
+    return render_template("view.html", **context)
 
 
 if __name__ == "__main__":
@@ -282,11 +297,6 @@ if __name__ == "__main__":
     @click.option("--threaded", is_flag=True)
     @click.argument("HOST", default="0.0.0.0")
     @click.argument("PORT", default=8111, type=int)
-
-
-    db.create_all()
-
-
     def run(debug, threaded, host, port):
         """
         This function handles command line parameters.

@@ -3,14 +3,15 @@
 <div class="query">
     Looking For....
 
-    <div id="target_type">
-        <label for="target_type">Target type </label><input type="text" id="target_type" />
-    </div>
+    <select name="" id="user_type" onchange="newform()">
+        <option value="artist" selected>Artist</option>
+        <option value="customer">Customer</option>
+    </select>
 
     <div id="artist">
         <form action="" method="POST">
             <br>
-            <label for="name">Name of artist </label><input type="text" id="name" />
+            <label for="name">Name </label><input type="text" id="name" />
             <br>
             <label for="skill">Skills </label><input type="text" id="skill" />
             <br>
@@ -23,11 +24,9 @@
             <input type="submit" value="Submit">
         </form>
     </div>
-
-
-    <!-- <div id="customer">
+    <div id="customer" style="visibility:hidden">
         <form action="" method="POST">
-            <label for="name">Name of customer</label><input type="text" id="name" />
+            <label for="name">Name</label><input type="text" id="name" />
             <br>
             <label for="industry">Industry</label><input type="text" id="industry" />
             <br>
@@ -39,12 +38,25 @@
             <br>
             <input type="submit" value="Submit">
         </form>
-    </div> -->
+    </div>
 
+    <script type="text/javascript">
+        function newform() {
+            var x = document.getElementById("user_type").value;
+            if (x == "artist") {
+                document.getElementById("artist").style.visibility = "visible";
+                document.getElementById("customer").style.visibility = "hidden";
+            }
+            else {
+                document.getElementById("customer").style.visibility = "visible";
+                document.getElementById("artist").style.visibility = "hidden";
+            }
+        }
+    </script>
 </div>
 
 <!--Triggered by submitting-->
-<div class="results">
+<div class="results" style="visibility:hidden">
 
 </div>
 {% endblock %}

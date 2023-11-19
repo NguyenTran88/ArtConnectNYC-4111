@@ -3,6 +3,11 @@
 <div class="query">
     Looking For....
 
+    <select name="" id="user_type" onchange="newform()">
+        <option value="artist" selected>Artist</option>
+        <option value="customer">Customer</option>
+    </select>
+
     <div id="target_type">
         <label for="target_type">Target type </label><input type="text" id="target_type" />
     </div>
@@ -22,10 +27,9 @@
             <br>
             <input type="submit" value="Submit">
         </form>
+
     </div>
-
-
-    <!-- <div id="customer">
+    <div id="customer">
         <form action="" method="POST">
             <label for="name">Name of customer</label><input type="text" id="name" />
             <br>
@@ -39,7 +43,7 @@
             <br>
             <input type="submit" value="Submit">
         </form>
-    </div> -->
+    </div>
 
 </div>
 
