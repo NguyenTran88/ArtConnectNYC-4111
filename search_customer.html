@@ -12,34 +12,39 @@
         </select>
         
         <div id="Name">
-          <form action="/search_artist">
+          <form method="POST" action="">
                 <br>
-                <label for="name">Name </label><input type="text" id="name"/>
-                <input type="button" value="Submit" id="name_btn">
+                <label for="name">Name </label>
+                <input type="text" id="name" name="name"/>
+                <input type="submit" value="Submit" id="name_btn">
             </form>
         </div>
         <div id="Industry" style="visibility:hidden">
-            <form action="">
-                <label for="industry">Industry</label><input type="text" id="industry"/>
-                <input type="button" value="Submit" id="industry_btn">
+            <form method="POST" action="">
+                <label for="industry">Industry</label>
+                <input type="text" id="industry"name ="industry"/>
+                <input type="submit" value="Submit" id="industry_btn">
             </form>
         </div>
         <div id="Product" style="visibility:hidden">
-            <form action="">
-                <label for="product">Looking for...Product </label><input type="text" id="product"/>
-                <input type="button" value="Submit" id="product_btn">
+            <form method="POST" action="">
+                <label for="product">Looking for...Product </label>
+                <input type="text" id="product" name="product"/>
+                <input type="submit" value="Submit" id="product_btn">
             </form>
         </div>
         <div id="Service" style="visibility:hidden">
-            <form action="">            
-                <label for="service">Looking for... Service </label><input type="text" id="service"/>
-                <input type="button" value="Submit" id="service_btn">
+            <form method="POST" action="">            
+                <label for="service">Looking for... Service </label>
+                <input type="text" id="service" name="service"/>
+                <input type="submit" value="Submit" id="service_btn">
             </form>
         </div>
         <div id="Location" style="visibility:hidden">
-            <form action="">
-                <label for="location">Location (zip) </label><input type="text" 	id="location"/>
-                <input type="button" value="Submit" id="loc_btn">
+            <form method="POST" action="">
+                <label for="location">Location (zip) </label>
+                <input type="text" 	id="location" name="location"/>
+                <input type="submit" value="Submit" id="loc_btn">
             </form>
         </div>
         
