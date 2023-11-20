@@ -2,33 +2,30 @@
 
 {% block content %}
 <h2>User Information</h2>
-{% for user in users %}
-{{ user.name }}
-{{ user.email }}
-{{ user.location }}
-{{ user.product_id if user.product_id }}
-{{ user.service_id if user.service_id }}
-{% endfor %}
-<!-- <table>
+{{users[0]}}
+<table>
     <thead>
         <tr>
             <th>Name</th>
             <th>Email</th>
             <th>Location</th>
-            <th>Product_id</th>
-            <th>Service_id</th>
+            <th>Skill_id</th>
+            <th>Medium</th>
+            <th>Service Type</th>
         </tr>
     </thead>
     <tbody>
         {% for user in users %}
+        <!-- <p>{{user}}</p> -->
         <tr>
             <td>{{ user.name }}</td>
             <td>{{ user.email }}</td>
             <td>{{ user.location }}</td>
-            <td>{{ user.product_id if user.product_id }}</td>
-            <td>{{ user.service_id if user.service_id }}</td>
+            <td>{{ user.skill_id if user.skill_id is not none }}</td>
+            <td>{{ user.medium if user.medium }}</td>
+            <td>{{ user.service_type if user.service_type }}</td>
         </tr>
         {% endfor %}
     </tbody>
-</table> -->
+</table>
 {% endblock %}
