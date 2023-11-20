@@ -11,7 +11,7 @@ Read about it online.
 import os
 from sqlalchemy import *
 from sqlalchemy.pool import NullPool
-from flask import Flask, request, render_template, g, redirect, Response, abort
+from flask import Flask, request, render_template, g, redirect, Response, abort, url_for
 
 tmpl_dir = os.path.join(os.path.dirname(os.path.abspath(__file__)), "templates")
 app = Flask(__name__, template_folder=tmpl_dir)
@@ -192,47 +192,12 @@ def index():
 def another():
     return render_template("another.html")
 
-@app.route("/search_artist", methods = ["POST", "GET"])
-def search_artist():
-    input_field = next(iter(request.form.keys()) , None)
-
-    if input_field :
-        input = request.form[input_field]
-        input_list = input.split(",")
-        
-        if input == "name":
-            for name in input_list:
-                cursor = g.conn.execute(text("SELECT *FROM users U, artist A WHERE U.user_id = A.user_id "))
-                # cursor = g.conn.execute(text("""SELECT U.name, A.skill_set, U.email FROM users U, artist A WHERE U.user_id = A.user_id AND U.name = 'myriam'"""))
-                print(cursor)
-                for result in cursor:
-                    print(result)
-
-
-        # if input == "skill":
-        #     cursor = g.conn.execute(text("SELECT * FROM users U, artist A, has S WHERE U.user_id == A.user_id AND A.user_id == S.user_id AND input_list CONTAINS S.skill_id"))
-        
-    return render_template("SearchArtists.html")
-
-@app.route("/test", methods = ['POST', 'GET'])
-def test():
-    # cursor = g.conn.execute(text("INSERT INTO test(name) VALUES (:name)"), params_dict)
-    # g.conn.commit()
-    # print("")
-    # for result in cursor:
-    #     print(result)
-    # cursor.close()
-
-    print(request.form)
-    return render_template("test.html")
-
-
 # Example of adding new data to the database
 @app.route("/add", methods=["POST"])
 def add():
     name = request.form["name"]
     params_dict = {"name": name}
-    g.conn.execute(text("SELECT * FROM users U, artist a WHERE u.user_id = a.user_id"))
+    g.conn.execute(text("INSERT INTO test(name) VALUES (:name)"), params_dict)
     g.conn.commit()
 
     return redirect("/")
@@ -243,73 +208,196 @@ def login():
     abort(401)
     this_is_never_executed()
 
-
-merged_dict = {
-    "user_id_artist": "a",
-    "portfolio_link": "a",
-    "price_lower_bound": "a",
-    "price_upper_bound": "a",
-    "availableforhire": "a",
-    "user_id_users": "u",
-    "name": "u",
-    "location": "u",
-    "email": "u",
-    "bio": "u",
-    "user_id_customer": "c",
-    "hiring": "c",
+skills_mapping = {
+    "dj": 0,
+    "jazz musician": 1,
+    "classical musician": 2,
+    "painter": 3,
+    "illustrator": 4,
+    "ceramics": 5,
+    "sculpture": 6,
+    "portrait": 7,
+    "piano": 8,
+    "acrylics": 9,
+    "modeling": 10,
 }
 
 
-@app.route("/search", methods=["POST", "GET"])
-def search():
+@app.route("/search_customer", methods=["POST", "GET"])
+def search_customer():
+    
     if request.method == "GET":
-        return render_template("search2.html")
+        return render_template("search_customer.html")
 
-    print(request.form)
-    target = request.form[
-        "target_type"
-    ]  # this tells us whether we are searching for artist or customer
+    input_field = next(iter(request.form.keys()), None)
+    input = request.form[input_field]
+    input = input.lower()
 
-    if target == "artist":
-        query_str = "SELECT * FROM users U, artist a WHERE u.user_id = a.user_id AND "
-    else:
-        query_str = "SELECT * FROM users U, artist a WHERE u.user_id = c.user_id AND "
+    input_list = input.split(", ")
+    
+    user_info = []
+    if input_field:
+        if input_field == "name":
+            for actual_name in input_list:
+                params_dict = {"actual_name": actual_name}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, customer C WHERE U.user_id = C.user_id AND UPPER(U.name) LIKE UPPER(:actual_name)"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
+        elif input_field == "location":
+            for actual_location in input_list:
+                params_dict = {"actual_location": actual_location}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, customer C WHERE U.user_id = C.user_id AND U.location = :actual_location"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
 
-    print(query_str)
-    # slec from user u, artist a, skills s where s.skill = %s
-    # loop over everything, see if it is filled out, only 1 is filled out
-    # if it is filled out, add to query string
-    # VD: query_str = SELECT * FROM users U, artist a,
-    # if skill set is filled out => query_str += skill_set s
-    # query_str += WHERE u.user_id = a.user_id AND u.name = 'Vivian'
-    # SELECT * FROM users U artist a, {%s} extra WHERE 
+        elif input_field == "industry":
+            for actual_industry in input_list:
+                params_dict = {"actual_industry": actual_industry}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT * FROM users U, customer C, owns_business B WHERE U.user_id = C.user_id AND C.user_id = B.user_id AND UPPER(B.industry) LIKE UPPER(:actual_industry)"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
 
-    # key is the name of the input, val is the value of the input
-    for key, val in request.form.items():
-        if val and len(val) > 0:
-            parent_table = merged_dict[key]
-            # now parent_table = u,a, or c
-            # think about cases where upper bound => we use <,> instead of =
-            if key == "price_lower_bound":
-                query_str += parent_table + "price_lower_bound" + " >= " + val + " AND "
-            elif key == "price_upper_bound":
-                query_str += parent_table + "price_upper_bound" + " <= " + val + " AND "
-            else:
-                query_str += parent_table + key + " = " + val + " AND "
+        elif input_field == "product":
+            # choose products based on medium: i.e: I want to buy a painting, sculpture,...
+            for actual_product in input_list:
+                params_dict = {"actual_product": actual_product}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT * FROM users U, customer C, make_request R WHERE U.user_id = C.user_id AND C.user_id = R.user_id AND UPPER(R.product_name) LIKE UPPER(:actual_product)"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    user_info.append(result)
+                    print(result)
+        elif input_field == "service":
+            for actual_service in input_list:
+                params_dict = {"actual_service": actual_service}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT * FROM users U, customer C, make_request R WHERE U.user_id = C.user_id AND C.user_id = R.user_id AND UPPER(R.service_type) LIKE UPPER(:actual_service)"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    user_info.append(result)
+                    print(result)
+    print("my_user_info", user_info)
+    # return render_template("search_artist.html")
+    return redirect(url_for("view", users=user_info))
 
-    query_str = query_str[:-4] + ";"
-    print(query_str)
-    cursor = g.conn.execute(text(query_str))
-    g.conn.commit()
-    cursor.close()
 
-    results = []
-    for result in cursor:
-        print(result[0])  # debug name
-        results.append(result)
+@app.route("/search_artist", methods=["POST", "GET"])
+def search_artist():
+   
+    if request.method == "GET":
+        return render_template("search_artist.html")
 
-    context = dict(data=results)
-    return render_template("view.html", **context)
+    input_field = next(iter(request.form.keys()), None)
+    input = request.form[input_field]
+    input = input.lower()
+
+    input_list = input.split(", ")
+    
+    user_info = []
+    if input_field:
+        if input_field == "name":
+            for actual_name in input_list:
+                params_dict = {"actual_name": actual_name}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, artist A WHERE U.user_id = A.user_id AND UPPER(U.name) LIKE UPPER(:actual_name)"""
+                    ),
+                    params_dict,
+                )
+                
+                g.conn.commit()
+                for result in cursor:
+                    user_info.append(result)
+                    print(result)
+
+
+        elif input_field == "location":
+            for actual_location in input_list:
+                params_dict = {"actual_location": actual_location}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, artist A WHERE U.user_id = A.user_id AND U.location = :actual_location"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
+        elif input_field == "skill":
+            for actual_skill in input_list:
+                skill_id = skills_mapping[actual_skill]
+                params_dict = {"actual_skill": skill_id}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email FROM users U, artist A, has H WHERE U.user_id = A.user_id AND A.user_id = H.user_id AND H.skill_id = :actual_skill"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    print(result)
+        elif input_field == "product":
+            # choose products based on medium: i.e: I want to buy a painting, sculpture,...
+            for actual_product in input_list:
+                params_dict = {"actual_product": actual_product}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT * FROM users U, artist A, poffers_products P WHERE U.user_id = A.user_id AND A.user_id = P.user_id AND UPPER(P.medium) LIKE UPPER(:actual_product)"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    user_info.append(result)
+                    print(result)
+        elif input_field == "service":
+            for actual_service in input_list:
+                params_dict = {"actual_service": actual_service}
+                cursor = g.conn.execute(
+                    text(
+                        """SELECT U.name, U.email, S.service_id FROM users U, artist A, soffers_services S WHERE U.user_id = A.user_id AND A.user_id = S.user_id AND UPPER(S.service_type) LIKE UPPER(:actual_service)"""
+                    ),
+                    params_dict,
+                )
+                g.conn.commit()
+                for result in cursor:
+                    user_info.append(result)
+                    print(result)
+    print("my_user_info", user_info)
+    # return render_template("search_artist.html")
+    return redirect(url_for("view", users=user_info))
+
+
+@app.route("/view/<users>", methods=["POST", "GET"])
+def view(users):
+    return render_template("view.html", users=users)
+
 
 
 if __name__ == "__main__":
