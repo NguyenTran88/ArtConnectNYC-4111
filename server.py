@@ -216,7 +216,7 @@ def add():
     return redirect("/")
 
 
-@app.route("/login")
+@app.route("/artist_login")
 def login():
     abort(401)
     this_is_never_executed()
@@ -602,7 +602,7 @@ def create_artist_profile():
 
     # at this point, there's a new profile
 
-    return redirect(url_for("edit_artist_profile", usr_id=usr_id))
+    return redirect(url_for("edit_artist_profile", usr_id=usr_id))   
 
 
 @app.route("/edit_artist_profile/<usr_id>", methods=["POST", "GET"])
@@ -720,6 +720,195 @@ def edit_artist_profile(usr_id):
                 
             update_query = (
             "UPDATE soffers_services SET "
+            + ", ".join([f"{key} = :{key}" for key in params_dict.keys()])
+            + " WHERE user_id = :user_id"
+        )
+        
+        cursor = g.conn.execute(text(update_query), params_dict)
+        g.conn.commit()
+        cursor.close()
+
+    #TODO: redirect to View
+    return redirect(url_for("index"))
+
+@app.route("/create_customer_profile", methods=["POST", "GET"])
+def create_customer_profile():
+    if request.method == "GET":
+        return render_template("login.html")
+
+    name_value = request.form["name"]
+    email_value = request.form["email"]
+
+    params_dict = {"actual_name": name_value, "actual_email": email_value}
+    # how to make actual_email unique ?
+    cursor = g.conn.execute(
+        text(
+            """SELECT * FROM users U where U.name = :actual_name AND U.email = :actual_email"""
+        ),
+        params_dict,
+    )
+    g.conn.commit()
+
+    usr_id = -1
+    # insert into users if there's none in users
+    if cursor.rowcount == 0:
+        cursor.close()
+        max_cursor = g.conn.execute(text("""SELECT MAX(user_id) FROM users"""))
+        max_id = max_cursor.fetchone()[0]
+        params_dict["actual_user_id"] = max_id + 1
+        usr_id = max_id + 1
+        max_cursor.close()
+
+        cursor = g.conn.execute(
+            text(
+                """INSERT INTO users(user_id, name, email) VALUES (:actual_user_id, :actual_name, :actual_email)"""
+            ),
+            params_dict,
+        )
+        g.conn.commit()
+        cursor.close()
+    else:
+        usr_id = cursor.fetchone()[0]
+        cursor.close()
+    params_dict["actual_user_id"] = usr_id
+    print("usr_id", usr_id)
+
+    # insert into customer if there's none in customer, we need to fetch user_id to do this
+    cursor = g.conn.execute(
+        text(
+            """
+        SELECT * FROM users U, customer C WHERE U.user_id = C.user_id AND U.name = :actual_name AND U.email = :actual_email"""
+        ),
+        params_dict,
+    )
+    if cursor.rowcount == 0:
+        cursor = g.conn.execute(
+            text("""INSERT INTO customer(user_id) VALUES (:actual_user_id)"""),
+            params_dict,
+        )
+
+        g.conn.commit()
+        cursor.close()
+
+    # at this point, there's a new profile
+
+    return redirect(url_for("edit_customer_profile", usr_id=usr_id))   
+
+
+@app.route("/edit_customer_profile/<usr_id>", methods=["POST", "GET"])
+def edit_customer_profile(usr_id):
+    if request.method == "GET":
+        return render_template("edit_customer_profile.html")
+
+    # else, we have usr_id and can manipulate stuff
+    params_dict = {"user_id": usr_id}
+
+    # update users: => form2
+    if request.form["form_id"] == "form2":
+        for key, val in request.form.items():
+            if (
+                not val or len(val) == 0 or key == "form_id"
+            ):  # form_id is not a column in table
+                continue
+            params_dict[key] = val
+
+        update_query = (
+            "UPDATE Users SET "
+            + ", ".join([f"{key} = :{key}" for key in params_dict.keys()])
+            + " WHERE user_id = :user_id"
+        )
+        cursor = g.conn.execute(text(update_query), params_dict)
+        g.conn.commit()
+        cursor.close()
+
+    # update customer: => form1
+    elif request.form["form_id"] == "form1":
+        for key, val in request.form.items():
+            if not val or len(val) == 0 or key == "form_id":
+                continue
+            params_dict[key] = val
+
+        update_query = (
+            "UPDATE customer SET "
+            + ", ".join([f"{key} = :{key}" for key in params_dict.keys()])
+            + " WHERE user_id = :user_id"
+        )
+        cursor = g.conn.execute(text(update_query), params_dict)
+        g.conn.commit()
+        cursor.close()
+
+    # update business: => form3\
+    elif request.form["form_id"] == "form3":
+        for key, val in request.form.items():
+            if not val or len(val) == 0 or key == "form_id":
+                continue
+            params_dict[key] = val
+        if params_dict["bName"] == "-":
+            if params_dict["industry"] == "-":
+                if params_dict["website"] == "-":
+                    update_query = (
+                        "DELETE FROM owns_business B WHERE B.user_id = :user_id AND B.business_id = :business_id"
+                    )
+        
+        else:
+            #if no business_id, but other fields => add to table
+            if params_dict['business_id'] == "-":
+                max_cursor = g.conn.execute(text("""SELECT MAX(business_id) FROM owns_business"""))
+                max_id = max_cursor.fetchone()[0]
+                params_dict["business_id"] = max_id + 1
+                business_id = max_id + 1
+                max_cursor.close()
+                
+                cursor = g.conn.execute(
+                    text(
+                        """INSERT INTO owns_business(business_id, user_id) VALUES (""" + str(params_dict["business_id"]) + "," + ":user_id)"
+                    ),
+                    params_dict,
+                )
+                
+            update_query = (
+            "UPDATE owns_business SET "
+            + ", ".join([f"{key} = :{key}" for key in params_dict.keys()])
+            + " WHERE user_id = :user_id"
+        )
+        
+        cursor = g.conn.execute(text(update_query), params_dict)
+        g.conn.commit()
+        cursor.close()
+
+    # update service: => form4\
+    elif request.form["form_id"] == "form4":
+        for key, val in request.form.items():
+            if not val or len(val) == 0 or key == "form_id":
+                continue
+            params_dict[key] = val
+        
+        if params_dict["time_frame_day"] == "-":
+            if params_dict["max_budget"] == "-":
+                if params_dict["service_type"] == "-":
+                    if params_dict["product_name"] == "-":
+                        update_query = (
+                            "DELETE FROM make_request R WHERE R.user_id = :user_id AND R.request_id = :request_id"
+                        )
+        
+        else:
+            #if no request_id, but other fields => add to table
+            if params_dict['request_id'] == "-":
+                max_cursor = g.conn.execute(text("""SELECT MAX(request_id) FROM make_request"""))
+                max_id = max_cursor.fetchone()[0]
+                params_dict["request_id"] = max_id + 1
+                request_id = max_id + 1
+                max_cursor.close()
+                
+                cursor = g.conn.execute(
+                    text(
+                        """INSERT INTO make_request(request_id, user_id) VALUES (""" + str(params_dict["request_id"]) + "," + ":user_id)"
+                    ),
+                    params_dict,
+                )
+                
+            update_query = (
+            "UPDATE make_request SET "
             + ", ".join([f"{key} = :{key}" for key in params_dict.keys()])
             + " WHERE user_id = :user_id"
         )
