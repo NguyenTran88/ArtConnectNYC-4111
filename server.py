@@ -443,26 +443,42 @@ def search_customer():
                 print(params_dict, "actual_name", actual_name)
                 cursor = g.conn.execute(
                     text(
-                        """SELECT U.name, U.email FROM users U, customer C WHERE U.user_id = C.user_id AND U.name = :actual_name"""
+                        """SELECT * FROM users U, customer C WHERE U.user_id = C.user_id AND U.name = :actual_name"""
                     ),
                     params_dict,
                 )
                 g.conn.commit()
                 for result in cursor:
-                    user_info.append(result)
+                    user_info.append(
+                        {
+                            "name": result[1],
+                            "location": result[2],
+                            "email": result[3],
+                            "bio": result[4],
+                            "hiring": result[6],
+                        }
+                    )
                     print(result)
         elif input_field == "location":
             for actual_location in input_list:
                 params_dict = {"actual_location": actual_location}
                 cursor = g.conn.execute(
                     text(
-                        """SELECT U.name, U.email FROM users U, customer C WHERE U.user_id = C.user_id AND U.location = :actual_location"""
+                        """SELECT * FROM users U, customer C WHERE U.user_id = C.user_id AND U.location = :actual_location"""
                     ),
                     params_dict,
                 )
                 g.conn.commit()
                 for result in cursor:
-                    user_info.append(result)
+                    user_info.append(
+                        {
+                            "name": result[1],
+                            "location": result[2],
+                            "email": result[3],
+                            "bio": result[4],
+                            "hiring": result[6],
+                        }
+                    )
                     print(result)
 
         elif input_field == "industry":
@@ -476,7 +492,15 @@ def search_customer():
                 )
                 g.conn.commit()
                 for result in cursor:
-                    user_info.append(result)
+                    user_info.append(
+                        {
+                            "name": result[1],
+                            "email": result[3],
+                            "location": result[2],
+                            "hiring": result[6],
+                            "industry": result[9],
+                        }
+                    )
                     print(result)
 
         elif input_field == "product":
@@ -491,7 +515,16 @@ def search_customer():
                 )
                 g.conn.commit()
                 for result in cursor:
-                    user_info.append(result)
+                    user_info.append(
+                        {
+                            "name": result[1],
+                            "email": result[3],
+                            "location": result[2],
+                            "hiring": result[6],
+                            "service_type": result[11],
+                            "product_name": result[12],
+                        }
+                    )
                     print(result)
         elif input_field == "service":
             for actual_service in input_list:
@@ -504,11 +537,19 @@ def search_customer():
                 )
                 g.conn.commit()
                 for result in cursor:
-                    user_info.append(result)
+                    user_info.append(
+                        {
+                            "name": result[1],
+                            "email": result[3],
+                            "location": result[2],
+                            "hiring": result[6],
+                            "service_type": result[11],
+                            "product_name": result[12],
+                        }
+                    )
                     print(result)
     print("my_user_info", user_info)
-    # return render_template("search_artist.html")
-    return redirect(url_for("view", users=user_info))
+    return redirect(url_for("view", users=json.dumps(user_info)))
 
 
 @app.route("/create_artist_profile", methods=["POST", "GET"])
@@ -581,7 +622,6 @@ def edit_artist_profile(usr_id):
         return render_template("edit_artist_profile.html")
 
     # else, we have usr_id and can manipulate stuff
-    print("gotcha", usr_id)
     params_dict = {"user_id": usr_id}
 
     # update users: => form2
