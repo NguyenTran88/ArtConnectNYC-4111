@@ -1,0 +1,52 @@
+{%extends "base.html"%}
+{%block content%}
+
+<!--Form => read in first name + email => if not exists INSERT-->
+<div class="query">
+    Edit Artist Profile
+
+    <div id="login">
+        <form method="POST" action=""> <!--@app.route('/edit_artist', methods = ['POST', 'GET'])-->
+            <br>
+            <label for="name">Name </label>
+            <input type="text" id="name" name = "name"/>
+            <input type="submit" value="Submit" id="name_btn">
+            <br>
+            <label for="email">Email </label>
+            <input type="text" id="email" name = "email"/>
+            <input type="submit" value="Submit" id="email_btn">
+        </form>
+    </div>
+
+    <!-- if no artist profile attatched to email and name but there IS a user-->
+    <p> Create new profile</p>
+    <div id="createA">
+        <form method="POST" actions="">
+            <br>
+            <label for="name">Name </label>
+            <input type="text" id="name" name = "name"/>
+            <input type="submit" value="Submit" id="name_btn">
+            <br>
+            <label for="email">Email </label>
+            <input type="text" id="email" name = "email"/>
+            <input type="submit" value="Submit" id="email_btn">
+            <br>
+            <label for="portfolio">Portfolio Link </label>
+            <input type="text" id="portfolio" name = "portfolio"/>
+            <input type="submit" value="Submit" id="portfolio_btn">
+            <br>
+            <label for="priceL">Price lower bound </label>
+            <input type="text" id="priceL" name = "priceL"/>
+            <input type="submit" value="Submit" id="priceL_btn">
+            <br>
+            <label for="priceH">Price upper bound </label>
+            <input type="text" id="priceH" name = "priceH"/>
+            <input type="submit" value="Submit" id="priceH_btn">
+        </form>
+    </div>
+    
+
+
+</div>
+
+{%endblock%}

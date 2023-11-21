@@ -1,0 +1,43 @@
+{% extends "base.html" %}
+
+{% block content %}
+<h2>User Information</h2>
+<!-- {{users[0]}} -->
+<table>
+    <thead>
+        <tr>
+            <th>Name</th>
+            <th>Email</th>
+            <th>Location</th>
+            <th>Skill_id</th>
+            <th>Medium</th>
+            <th>Service Type</th>
+
+            <th>Hiring ?</th>
+            <th>Product name</th>
+            <th>Product ID</th>
+            <th>Service ID </th>
+            <th>Industry</th>
+        </tr>
+    </thead>
+    <tbody>
+        {% for user in users %}
+        <!-- <p>{{user}}</p> -->
+        <tr>
+            <td>{{ user.name }}</td>
+            <td>{{ user.email }}</td>
+            <td>{{ user.location }}</td>
+            <td>{{ user.skill_id if user.skill_id is not none }}</td>
+            <td>{{ user.medium if user.medium }}</td>
+            <td>{{ user.service_type if user.service_type }}</td>
+
+            <td>{{ user.hiring if user.hiring else FALSE}}</td>
+            <td>{{ user.product_name if user.product_name }}</td>
+            <td>{{ user.product_id if user.product_id is not none}}</td>
+            <td>{{ user.service_id if user.service_id is not none}}</td>
+            <td>{{ user.industry if user.industry }}</td>
+        </tr>
+        {% endfor %}
+    </tbody>
+</table>
+{% endblock %}

@@ -1,0 +1,132 @@
+{%extends "base.html"%}
+{%block content%}
+    <div class="query">
+
+        Use commas and a space to separate terms <br>
+        Ex: Skill: drawing, photography, ... <br>
+        <br>
+        Search Artist by...
+       
+        <select name="" id="fields" onchange="newform()">
+            <option value="Name" selected>Name</option>
+            <option value="Skill">Skill</option>
+            <option value="Product">Product</option>
+            <option value="Service">Service</option>
+            <option value="Location">Location</option>
+        </select>
+        
+        <div id="Name">
+            <form method="POST" action=""> <!--@app.route('/SearchArtist', methods = ['GET'])-->
+                <br>
+                <label for="name">Name </label>
+                <input type="text" id="name" name = "name"/>
+                <input type="submit" value="Submit" id="name_btn">
+            </form>
+        </div>
+        <div id="Skill" style="visibility:hidden">
+            <form method="POST" action="">
+                <label for="skill">Skills </label>
+                <input type="text" id="skill" name = "skill"/>
+            <input type="submit" value="Submit" id="skill_btn">
+            </form>
+        </div>
+        <div id="Product" style="visibility:hidden">
+            <form method="POST" action="">
+                <label for="product">Product </label>
+                <input type="text" id="product" name = "product"/>
+            <input type="submit" value="Submit" id="product_btn">
+            </form>
+        </div>
+        <div id="Service" style="visibility:hidden">
+            <form method="POST" action="">
+                <label for="service">Service </label>
+                <input type="text" id="service" name = "service"/>
+            <input type="submit" value="Submit" id="service_btn">
+            </form>
+        </div>
+        <div id="Location" style="visibility:hidden">
+            <form method="POST" action="">
+                <label for="location">Location (zip) </label>
+                <input type="text" id="location" name = "location"/>
+            <input type="submit" value="Submit" id="loc_btn">
+            </form>
+        </div>
+        
+        <script type="text/javascript">
+        function newform()
+        {
+            var x = document.getElementById("fields").value;
+            if(x=="Name")
+            {
+                document.getElementById("Name").style.visibility = "visible";
+                document.getElementById("Skill").style.visibility = "hidden";
+                document.getElementById("Product").style.visibility = "hidden";
+                document.getElementById("Service").style.visibility = "hidden";
+                document.getElementById("Location").style.visibility = "hidden";
+            }
+            else if(x=="Skill")
+            {
+                document.getElementById("Name").style.visibility = "hidden";
+                document.getElementById("Skill").style.visibility = "visible";
+                document.getElementById("Product").style.visibility = "hidden";
+                document.getElementById("Service").style.visibility = "hidden";
+                document.getElementById("Location").style.visibility = "hidden";
+            }
+            else if(x=="Product")
+            {
+                document.getElementById("Name").style.visibility = "hidden";
+                document.getElementById("Skill").style.visibility = "hidden";
+                document.getElementById("Product").style.visibility = "visible";
+                document.getElementById("Service").style.visibility = "hidden";
+                document.getElementById("Location").style.visibility = "hidden";
+            }
+            else if(x=="Service")
+            {
+                document.getElementById("Name").style.visibility = "hidden";
+                document.getElementById("Skill").style.visibility = "hidden";
+                document.getElementById("Product").style.visibility = "hidden";
+                document.getElementById("Service").style.visibility = "visible";
+                document.getElementById("Location").style.visibility = "hidden";
+            }
+            else if(x=="Location")
+            {
+                document.getElementById("Name").style.visibility = "hidden";
+                document.getElementById("Skill").style.visibility = "hidden";
+                document.getElementById("Product").style.visibility = "hidden";
+                document.getElementById("Service").style.visibility = "hidden";
+                document.getElementById("Location").style.visibility = "visible";
+            }
+        }
+
+        document.getElementById("name_btn").onclick = function(){
+            var input = document.getElementById("name").value;
+            document.getElementById("p1").innerHTML = input;
+        }
+
+        document.getElementById("skill_btn").onclick = function(){
+            var input = document.getElementById("skill").value;
+            document.getElementById("p1").innerHTML = input;
+        }
+
+        document.getElementById("product_btn").onclick = function(){
+            var input = document.getElementById("product").value;
+            document.getElementById("p1").innerHTML = input;
+        }
+
+        document.getElementById("service_btn").onclick = function(){
+            var input = document.getElementById("service").value;
+            document.getElementById("p1").innerHTML = input;
+        }
+
+        document.getElementById("loc_btn").onclick = function(){
+            var input = document.getElementById("location").value;
+            document.getElementById("p1").innerHTML = input;
+        }
+        
+        </script>
+        <p id="p1"></p>
+    </div>  
+
+    <!--Triggered by submitting-->
+    
+{%endblock%}

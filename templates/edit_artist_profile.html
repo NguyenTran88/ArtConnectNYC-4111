@@ -1,0 +1,172 @@
+{% extends "base.html" %} 
+{% block title %}
+
+Edit artist profile{% endblock %} {% block
+    content %}
+    
+    <!-- Form for Users Table -->
+    <div id="users">
+        Update User 
+        <form action="" method="post">
+            <br>
+            <input type="hidden" name="form_id" value="form2">
+            <label for="user_id">User ID:</label>
+            <input type="text" name="user_id">
+            <br>
+            <label for="name">Name:</label>
+            <input type="text" name="name">
+            <br>
+            <label for="location">Location:</label>
+            <input type="text" name="location">
+            <br>
+            <label for="email">Email:</label>
+            <input type="text" name="email">
+            <br>
+            <label for="bio">Bio:</label>
+            <input type="text" name="bio">
+            <!-- <textarea name="bio" required></textarea> -->
+            <br>
+            <button type="submit">Submit Users Form</button>
+        </form>
+    </div>
+    <br>
+    <!-- Form for Artist Table -->
+    <div>
+        <form action="" method="post">
+            <!-- WE NEED THIS HIDDEN INPUT FIELDS TO TELL WHAT FORM SUBMITTED THIS-->
+            <input type="hidden" name="form_id" value="form1">
+            <!-- <label for="artist_user_id">User ID:</label>
+            <input type="text" name="artist_user_id" required> -->
+                
+            <label for="portfolio_link">Portfolio Link:</label>
+            <input type="text" name="portfolio_link">
+            <br>
+            <label for="price_lower_bound">Price Lower Bound:</label>
+            <input type="text" name="price_lower_bound">
+            <br>
+            <label for="price_upper_bound">Price Upper Bound:</label>
+            <input type="text" name="price_upper_bound">
+            <br>
+            <label for="availableforhire">Available For Hire: (Type "TRUE" or "FALSE")</label>
+            <input type="text" name="availableforhire">
+            <br>
+            <button type="submit">Submit Artist Form</button>
+        </form>
+    </div>
+    <br>
+
+
+    Update my...
+    <select name="" id="update_fields" onchange="newform()">
+        <option value="products" selected>Products</option>
+        <option value="services">Services</option>
+        <option value="skills">Skills</option>
+        
+    </select>
+
+    <div id="products">
+        <br>
+        Use /search_artist to find Product ID
+        <br>
+        To delete product, enter product_id and enter - for other fields
+        <br>
+        To add new product, enter - for product_id
+        <form action="" method="POST">
+            <br>
+            <input type="hidden" name="form_id" value="form3">
+            <label for="product_id">Product ID:</label>
+            <input type="text" name="product_id">
+            <br>
+            <label for="medium">Medium:</label>
+            <input type="text" name="medium">
+            <br>
+            <label for="price">Price:</label>
+            <input type="text" name="price">
+            <br>
+            <label for="in_stock">In Stock: (type "TRUE" or "FALSE")</label>
+            <input type="text" name="inStock">
+            <br>
+            <!-- <label for="artist_user_id_poffers">Artist User ID:</label>
+            <input type="text" name="user_id_poffers" required> -->
+    
+            <button type="submit">Submit POffers_Products Form</button>
+        </form>
+    </div>
+    <br>
+    
+    <div id="services" style="visibility:hidden">
+        <!-- Form for SOffers_Services Table -->
+        Use /search_artist to find service_id
+        <br>
+        To delete service, enter service_id, and enter - for other fields 
+        <br>
+        To add new service, enter - for service_id
+        <form action="" method="POST">
+            <input type="hidden" name="form_id" value="form4">
+            <br>
+            <!-- <label for="artist_user_id_soffers">Artist User ID:</label>
+            <input type="text" name="user_id_soffers" required> -->
+            
+            <label for="service_id">Service ID:</label>
+            <input type="text" name="service_id">
+            <br>
+            <label for="service_type">Service Type:</label>
+            <input type="text" name="service_type">
+            <br>
+            <label for="styles">Styles:</label>
+            <input type="text" name="styles">
+            <br>
+            <label for="time_needed">Time Needed:</label>
+            <input type="text" name="time_needed">
+            <br>
+            <label for="price_soffers">Price:</label>
+            <input type="text" name="price">
+            <br>
+            <button type="submit">Submit SOffers_Services Form</button>
+        </form>
+    </div>
+    <br>
+    
+    <!-- Form for has Table -->
+    <div id="skills" style="visibility:hidden">
+        <form action="" method="POST">
+            <br>
+            <input type="hidden" name="form_id" value="form5">
+            <label for="skill_name">Skill Name:</label>
+            <input type="text" name="skill_name">   
+            <br>
+            <label for="years">Years:</label>
+            <input type="text" name="years">
+            <br>
+            <button type="submit">Submit has Form</button>
+        </form>
+    </div>
+
+    <script type="text/javascript">
+        function newform()
+        {
+            var x = document.getElementById("update_fields").value;
+            if(x=="products")
+            {
+                document.getElementById("products").style.visibility = "visible";
+                document.getElementById("services").style.visibility = "hidden";
+                document.getElementById("skills").style.visibility = "hidden";
+            }
+            else if(x=="services")
+            {
+                document.getElementById("products").style.visibility = "hidden";
+                document.getElementById("services").style.visibility = "visible";
+                document.getElementById("skills").style.visibility = "hidden";
+            }
+            else if(x=="skills")
+            {
+                document.getElementById("products").style.visibility = "hidden";
+                document.getElementById("services").style.visibility = "hidden";
+                document.getElementById("skills").style.visibility = "visible";
+            }            
+        }
+
+        </script>
+
+    <br>
+    {% endblock %}
