@@ -432,7 +432,6 @@ def search_customer():
 
     input_field = next(iter(request.form.keys()), None)
     input = request.form[input_field]
-    # input = input.lower()
 
     input_list = input.split(", ")
 
@@ -510,6 +509,153 @@ def search_customer():
     print("my_user_info", user_info)
     # return render_template("search_artist.html")
     return redirect(url_for("view", users=user_info))
+
+
+@app.route("/create_artist_profile", methods=["POST", "GET"])
+def create_artist_profile():
+    if request.method == "GET":
+        return render_template("create_artist_profile.html")
+
+    name_value = request.form["name"]
+    email_value = request.form["email"]
+
+    params_dict = {"actual_name": name_value, "actual_email": email_value}
+    # how to make actual_email unique ?
+    cursor = g.conn.execute(
+        text(
+            """SELECT * FROM users U where U.name = :actual_name AND U.email = :actual_email"""
+        ),
+        params_dict,
+    )
+    g.conn.commit()
+
+    usr_id = -1
+    # insert into users if there's none in users
+    if cursor.rowcount == 0:
+        cursor.close()
+        max_cursor = g.conn.execute(text("""SELECT MAX(user_id) FROM users"""))
+        max_id = max_cursor.fetchone()[0]
+        params_dict["actual_user_id"] = max_id + 1
+        usr_id = max_id + 1
+        max_cursor.close()
+
+        cursor = g.conn.execute(
+            text(
+                """INSERT INTO users(user_id, name, email) VALUES (:actual_user_id, :actual_name, :actual_email)"""
+            ),
+            params_dict,
+        )
+        g.conn.commit()
+        cursor.close()
+    else:
+        usr_id = cursor.fetchone()[0]
+        cursor.close()
+    params_dict["actual_user_id"] = usr_id
+    print("usr_id", usr_id)
+
+    # insert into artist if there's none in artist, we need to fetch user_id to do this
+    cursor = g.conn.execute(
+        text(
+            """
+        SELECT * FROM users U, artist A WHERE U.user_id = A.user_id AND U.name = :actual_name AND U.email = :actual_email"""
+        ),
+        params_dict,
+    )
+    if cursor.rowcount == 0:
+        cursor = g.conn.execute(
+            text("""INSERT INTO artist(user_id) VALUES (:actual_user_id)"""),
+            params_dict,
+        )
+
+        g.conn.commit()
+        cursor.close()
+
+    # at this point, there's a new profile
+
+    return redirect(url_for("edit_artist_profile", usr_id=usr_id))
+
+
+@app.route("/edit_artist_profile/<usr_id>", methods=["POST", "GET"])
+def edit_artist_profile(usr_id):
+    if request.method == "GET":
+        return render_template("edit_artist_profile.html")
+
+    # else, we have usr_id and can manipulate stuff
+    print("gotcha", usr_id)
+    params_dict = {"user_id": usr_id}
+
+    # update users: => form2
+    if request.form["form_id"] == "form2":
+        for key, val in request.form.items():
+            if (
+                not val or len(val) == 0 or key == "form_id"
+            ):  # form_id is not a column in table
+                continue
+            params_dict[key] = val
+
+        update_query = (
+            "UPDATE Users SET "
+            + ", ".join([f"{key} = :{key}" for key in params_dict.keys()])
+            + " WHERE user_id = :user_id"
+        )
+        # cursor = g.conn.execute(text(update_query), {**params_dict, "user_id": usr_id}) => we don't need this, it's just creating new dict and add usr_id
+        cursor = g.conn.execute(text(update_query), params_dict)
+        g.conn.commit()
+        cursor.close()
+
+    # update artist: => form1
+    elif request.form["form_id"] == "form1":
+        for key, val in request.form.items():
+            if not val or len(val) == 0 or key == "form_id":
+                continue
+            params_dict[key] = val
+
+        update_query = (
+            "UPDATE Artist SET "
+            + ", ".join([f"{key} = :{key}" for key in params_dict.keys()])
+            + " WHERE user_id = :user_id"
+        )
+        cursor = g.conn.execute(text(update_query), params_dict)
+        g.conn.commit()
+        cursor.close()
+
+    # update product: => form3\
+    # elif request.form["form_id"] == "form3":
+    #     query = text("""SELECT * FROM poffers_products P WHERE P.user_id = :user_id""")
+    #     cursor = g.conn.execute(query, params_dict)
+    #     g.conn.commit()
+    #     product_list = []
+    #     for result in cursor:
+    #         product_list.append(
+    #             {
+    #                 "user_id": result[0],
+    #                 "product_id": result[1],
+    #                 "medium": result[2],
+    #                 "price": result[3],
+    #                 "inStock": result[4],
+    #             }
+    #         )
+    #         print(result)
+    #     return redirect(url_for("view", users=json.dumps(user_info)))
+
+    return redirect(url_for("index"))
+
+
+def getUsrId(name, email):
+    params_dict = {"actual_name": name, "actual_email": email}
+    cursor = g.conn.execute(
+        text(
+            """SELECT U.user_id FROM users U where U.name = :actual_name AND U.email = :actual_email"""
+        ),
+        params_dict,
+    )
+    g.conn.commit()
+    row = cursor.fetchone()
+    cursor.close()
+    if not row:
+        return -1
+    else:
+        return row[0]
 
 
 if __name__ == "__main__":
