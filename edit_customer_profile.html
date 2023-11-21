@@ -1,0 +1,109 @@
+{% extends "base.html" %} 
+{% block title %}
+
+Edit artist profile{% endblock %} {% block
+    content %}
+    
+    <!-- Form for Users Table -->
+    <div id="users">
+        Update User
+        <form action="" method="post">
+            <br>
+            <input type="hidden" name="form_id" value="form2">
+            <label for="user_id">User ID:</label>
+            <input type="text" name="user_id">
+            <br>
+            <label for="name">Name:</label>
+            <input type="text" name="name">
+            <br>
+            <label for="location">Location:</label>
+            <input type="text" name="location">
+            <br>
+            <label for="email">Email:</label>
+            <input type="text" name="email">
+            <br>
+            <label for="bio">Bio:</label>
+            <input type="text" name="bio">
+            <!-- <textarea name="bio" required></textarea> -->
+            <br>
+            <button type="submit">Submit Users Form</button>
+        </form>
+    </div>
+    <br>
+    <!-- Form for Customer Table -->
+    <div>
+        <form action="" method="post">
+            <!-- WE NEED THIS HIDDEN INPUT FIELDS TO TELL WHAT FORM SUBMITTED THIS-->
+            <input type="hidden" name="form_id" value="form1">
+            <br>  
+            <label for="hiring">Hiring (TRUE or FALSE):</label>
+            <input type="text" name="hiring">
+            <br>
+            <button type="submit">Submit Customer Form</button>
+        </form>
+    </div>
+    <br>
+
+
+    <div id="business">
+        <br>
+        Use /search_customer to find Business ID
+        <br>
+        To delete business, enter business_id and enter - for other fields
+        <br>
+        You can only have one business
+        <form action="" method="POST">
+            <input type="hidden" name="form_id" value="form3">
+            <br>
+            
+            <label for="business_id">Business ID:</label>
+            <input type="text" name="business_id">
+            <br>
+            <label for="bName">Business Name:</label>
+            <input type="text" name="bName">
+            <br>
+            <label for="industry">Industry:</label>
+            <input type="text" name="industry">
+            <br>
+            <label for="website">Website Link:</label>
+            <input type="text" name="website">
+            <br>
+            
+            <button type="submit">Submit Business Form</button>
+        </form>
+    </div>
+    <br>
+
+    
+    <!-- Form for make_request Table -->
+    Use /sarch_customer to get request_id
+    <br>
+    To make a new request, enter - for request_id
+    <br>
+    To delete a request, enter the request_id, and - for all other fields
+    <div id="request">
+        <form action="" method="POST">
+            <br>
+            <input type="hidden" name="form_id" value="form4">
+            <label for="request_id">Request ID:</label>
+            <input type="text" name="request_id">   
+            <br>
+            <label for="time_frame_day">Days to complete:</label>
+            <input type="text" name="time_frame_day">
+            <br>
+            <label for="max_budget">Max Budget:</label>
+            <input type="text" name="max_budget">
+            <br>
+            <label for="service_type">Service Needed:</label>
+            <input type="text" name="service_type">
+            <br>
+            <label for="product_name">Product Needed:</label>
+            <input type="text" name="product_name">
+            <br>
+            <button type="submit">Submit Request Form</button>
+        </form>
+    </div>
+
+
+    <br>
+    {% endblock %}
