@@ -254,7 +254,7 @@ def search_artist():
                 params_dict = {"actual_name": actual_name}
                 cursor = g.conn.execute(
                     text(
-                        """SELECT * FROM users U, artist A WHERE U.user_id = A.user_id AND U.name = :actual_name"""
+                        """SELECT * FROM users U, artist A WHERE U.user_id = A.user_id AND UPPER(U.name) LIKE UPPER(:actual_name)"""
                     ),
                     params_dict,
                 )
@@ -339,7 +339,7 @@ def search_artist():
                 params_dict = {"actual_product": actual_product}
                 cursor = g.conn.execute(
                     text(
-                        """SELECT * FROM users U, artist A, poffers_products P WHERE U.user_id = A.user_id AND A.user_id = P.user_id AND P.medium = :actual_product"""
+                        """SELECT * FROM users U, artist A, poffers_products P WHERE U.user_id = A.user_id AND A.user_id = P.user_id AND UPPER(P.medium) LIKE UPPER(:actual_product)"""
                     ),
                     params_dict,
                 )
@@ -369,7 +369,7 @@ def search_artist():
                 params_dict = {"actual_service": actual_service}
                 cursor = g.conn.execute(
                     text(
-                        """SELECT * FROM users U, artist A, soffers_services S WHERE U.user_id = A.user_id AND A.user_id = S.user_id AND S.service_type = :actual_service"""
+                        """SELECT * FROM users U, artist A, soffers_services S WHERE U.user_id = A.user_id AND A.user_id = S.user_id AND UPPER(S.service_type) LIKE UPPER (:actual_service)"""
                     ),
                     params_dict,
                 )
@@ -432,7 +432,7 @@ def search_customer():
                 print(params_dict, "actual_name", actual_name)
                 cursor = g.conn.execute(
                     text(
-                        """SELECT * FROM users U, customer C WHERE U.user_id = C.user_id AND U.name = :actual_name"""
+                        """SELECT * FROM users U, customer C WHERE U.user_id = C.user_id AND UPPER(U.name) LIKE UPPER(:actual_name)"""
                     ),
                     params_dict,
                 )
@@ -475,7 +475,7 @@ def search_customer():
                 params_dict = {"actual_industry": actual_industry}
                 cursor = g.conn.execute(
                     text(
-                        """SELECT * FROM users U, customer C, owns_business B WHERE U.user_id = C.user_id AND C.user_id = B.user_id AND B.industry = :actual_industry"""
+                        """SELECT * FROM users U, customer C, owns_business B WHERE U.user_id = C.user_id AND C.user_id = B.user_id AND UPPER(B.industry) LIKE UPPER(:actual_industry)"""
                     ),
                     params_dict,
                 )
@@ -498,7 +498,7 @@ def search_customer():
                 params_dict = {"actual_product": actual_product}
                 cursor = g.conn.execute(
                     text(
-                        """SELECT * FROM users U, customer C, make_request R WHERE U.user_id = C.user_id AND C.user_id = R.user_id AND R.product_name = :actual_product"""
+                        """SELECT * FROM users U, customer C, make_request R WHERE U.user_id = C.user_id AND C.user_id = R.user_id AND UPPER(R.product_name) LIKE UPPER(:actual_product)"""
                     ),
                     params_dict,
                 )
@@ -520,7 +520,7 @@ def search_customer():
                 params_dict = {"actual_service": actual_service}
                 cursor = g.conn.execute(
                     text(
-                        """SELECT * FROM users U, customer C, make_request R WHERE U.user_id = C.user_id AND C.user_id = R.user_id AND R.service_type = :actual_service"""
+                        """SELECT * FROM users U, customer C, make_request R WHERE U.user_id = C.user_id AND C.user_id = R.user_id AND UPPER(R.service_type) LIKE UPPER(:actual_service)"""
                     ),
                     params_dict,
                 )
@@ -553,7 +553,7 @@ def create_artist_profile():
     # how to make actual_email unique ?
     cursor = g.conn.execute(
         text(
-            """SELECT * FROM users U where U.name = :actual_name AND U.email = :actual_email"""
+            """SELECT * FROM users U where U.name = :actual_name AND UPPER(U.email) LIKE UPPER(:actual_email)"""
         ),
         params_dict,
     )
@@ -925,7 +925,7 @@ def getUsrId(name, email):
     params_dict = {"actual_name": name, "actual_email": email}
     cursor = g.conn.execute(
         text(
-            """SELECT U.user_id FROM users U where U.name = :actual_name AND U.email = :actual_email"""
+            """SELECT U.user_id FROM users U where UPPDER(U.name) LIKE UPPER(:actual_name) AND UPPER(U.email) LIKE UPPER(:actual_email)"""
         ),
         params_dict,
     )
